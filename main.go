@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
 )
 
@@ -12,12 +14,23 @@ func main() {
 
 	scraping := colly.NewCollector()
 
+	dataBase, _ := sql.Open("mysql", "root:ijse@tcp(127.0.0.1:3306)/ikman")
+
 	scraping.OnHTML(".gtm-normal-ad", func(element *colly.HTMLElement) {
+		model := element.ChildText(".heading--2eONR")
+		descr := element.ChildText(".description--2-ez3")
+		price := element.ChildText(".price--3SnqI")
 		fmt.Println("\n")
-		fmt.Println("\tModel: ", element.ChildText(".heading--2eONR"))
-		fmt.Println("\tPrice: ", element.ChildText(".price--3SnqI"))
-		fmt.Println("\tDesc: ", element.ChildText(".description--2-ez3"))
+		fmt.Println("\tmodel: ", model)
+		fmt.Println("\tprice: ", price)
+		fmt.Println("\tdescr: ", descr)
+
+		insert, err := dataBase.Query("INSERT INTO Adds (district, category, model, price, descr) VALUES (?, ?, ?, ?, ?)", district, category, model, price, descr)
+		check(err)
+		defer insert.Close()
 	})
+
+	_ = scraping.Visit("https://ikman.lk/en/ads/" + district + "/" + category)
 
 	scraping.OnRequest(func(r *colly.Request) {
 		fmt.Println(r.URL.String())
@@ -40,6 +53,10 @@ func District() string {
 	_, err := fmt.Scanf("%d", &district)
 	check(err)
 	if district == 1 {
+		return districts[district-1]
+	} else if district == 2 {
+		return districts[district-1]
+	} else if district == 3 {
 		return districts[district-1]
 	} else {
 		return "Cannot Found"
