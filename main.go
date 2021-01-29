@@ -41,6 +41,10 @@ func District() string {
 	check(err)
 	if district == 1 {
 		return districts[district-1]
+	} else if district == 2 {
+		return districts[district-1]
+	} else if district == 3 {
+		return districts[district-1]
 	} else {
 		return "Cannot Found"
 	}
@@ -73,3 +77,4 @@ func Categery() string {
 		return "Cannot Found"
 	}
 }
+
